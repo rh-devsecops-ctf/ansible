@@ -1,0 +1,67 @@
+---
+- name: Install environments
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  run_once: true
+
+  tasks:
+    - name: Discover OpenShift cluster facts
+      block:
+        - name: Get ingress config
+          when: openshift_cluster_ingress_domain is not defined
+          kubernetes.core.k8s_info:
+            api_version: config.openshift.io/v1
+            kind: Ingress
+            name: cluster
+          register: _ingress_config
+
+        - name: Set openshift_cluster_ingress_domain
+          when:
+            - openshift_cluster_ingress_domain is not defined
+            - _ingress_config.resources is defined
+            - _ingress_config.resources | length > 0
+          ansible.builtin.set_fact:
+            openshift_cluster_ingress_domain: "{{ _ingress_config.resources[0].spec.domain }}"
+
+        - name: Get console config
+          when: openshift_console_url is not defined
+          kubernetes.core.k8s_info:
+            api_version: config.openshift.io/v1
+            kind: Console
+            name: cluster
+          register: _console_config
+
+        - name: Set openshift_console_url
+          when:
+            - openshift_console_url is not defined
+            - _console_config.resources is defined
+            - _console_config.resources | length > 0
+          ansible.builtin.set_fact:
+            openshift_console_url: "{{ _console_config.resources[0].status.consoleURL }}"
+
+        - name: Get infrastructure config
+          when: openshift_api_url is not defined
+          kubernetes.core.k8s_info:
+            api_version: config.openshift.io/v1
+            kind: Infrastructure
+            name: cluster
+          register: _infra_config
+
+        - name: Set openshift_api_url
+          when:
+            - openshift_api_url is not defined
+            - _infra_config.resources is defined
+            - _infra_config.resources | length > 0
+          ansible.builtin.set_fact:
+            openshift_api_url: "{{ _infra_config.resources[0].status.apiServerURL }}"
+    - name: "Install Openshift GitOps"
+      ansible.builtin.include_role:
+        name: ocp4_workload_openshift_gitops
+      vars:
+        ACTION: provision      
+    - name: "Install DevSecOps CTF environment"
+      ansible.builtin.include_role:
+        name: ocp4_workload_devsecops_ctf
+      vars:
+        ACTION: provision

@@ -1,0 +1,26 @@
+---
+# ------------------------------------------------
+# OCP4 Authentication:
+# ------------------------------------------------
+ocp4_workload_authentication_htpasswd_user_password: openshift
+ocp4_workload_authentication_htpasswd_user_base: user
+ocp4_workload_authentication_htpasswd_user_count: 1
+
+# ------------------------------------------------
+# Users
+# ------------------------------------------------
+ocp4_workload_devsecops_ctf_user_count: "{{ ocp4_workload_authentication_htpasswd_user_count }}"
+ocp4_workload_devsecops_ctf_user_prefix: "{{ ocp4_workload_authentication_htpasswd_user_base }}"
+
+# ------------------------------------------------
+# DevSecOps CTF
+# ------------------------------------------------
+
+ocp4_workload_devsecops_ctf_application_name: devsecops-ctf
+ocp4_workload_devsecops_ctf_application_namespace: openshift-gitops
+
+ocp4_workload_devsecops_ctf_namespace: openshift-gitops
+
+ocp4_workload_devsecops_ctf_gitops_repo: https://github.com/rh-devsecops-ctf/helm.git
+ocp4_workload_devsecops_ctf_gitops_repo_tag: main
+ocp4_workload_devsecops_ctf_gitops_repo_path: bootstrap
